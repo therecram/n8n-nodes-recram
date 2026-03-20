@@ -1,4 +1,5 @@
 import type {
+	IDataObject,
 	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
@@ -157,17 +158,17 @@ export class Recram implements INodeType {
 					}
 				}
 
-				const responseData = response as Record<string, unknown>;
+				const responseData = response as IDataObject;
 				if (responseData?.data) {
 					const data = responseData.data;
 					if (Array.isArray(data)) {
 						returnData.push(
 							...data.map((item: unknown) => ({
-								json: item as Record<string, unknown>,
+								json: item as IDataObject,
 							})),
 						);
 					} else {
-						returnData.push({ json: data as Record<string, unknown> });
+						returnData.push({ json: data as IDataObject });
 					}
 				} else {
 					returnData.push({ json: responseData || {} });
