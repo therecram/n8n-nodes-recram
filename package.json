@@ -1,8 +1,10 @@
 {
   "name": "n8n-nodes-recram",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for RecRam — AI-powered video survey platform",
-  "keywords": ["n8n-community-node-package"],
+  "keywords": [
+    "n8n-community-node-package"
+  ],
   "license": "MIT",
   "homepage": "https://recram.com",
   "author": {
@@ -22,10 +24,14 @@
     "lintfix": "eslint nodes credentials package.json --fix",
     "prepublishOnly": "npm run build"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": ["dist/credentials/RecramApi.credentials.js"],
+    "credentials": [
+      "dist/credentials/RecramApi.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/Recram/Recram.node.js",
       "dist/nodes/Recram/RecramTrigger.node.js"
@@ -33,11 +39,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "n8n-workflow": "*",
-    "typescript": "~5.7",
-    "gulp": "^4.0.2",
     "eslint": "^8.56.0",
-    "prettier": "^3.2.0"
+    "gulp": "^4.0.2",
+    "n8n-workflow": "*",
+    "prettier": "^3.2.0",
+    "typescript": "~5.7"
   },
   "peerDependencies": {
     "n8n-workflow": "*"

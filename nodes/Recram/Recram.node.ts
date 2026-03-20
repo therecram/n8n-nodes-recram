@@ -26,6 +26,9 @@ export class Recram implements INodeType {
 				required: true,
 			},
 		],
+		requestDefaults: {
+			baseURL: '={{$credentials.baseUrl}}',
+		},
 		properties: [
 			{
 				displayName: 'Resource',
@@ -115,48 +118,36 @@ export class Recram implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
-		const credentials = await this.getCredentials('recramApi');
-		const baseUrl = credentials.baseUrl as string;
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
-				let response: unknown;
+				let url = '';
 
 				if (resource === 'form') {
 					if (operation === 'getAll') {
 						const limit = this.getNodeParameter('limit', i) as number;
-						response = await this.helpers.httpRequest({
-							method: 'GET',
-							url: `${baseUrl}/v1/forms?limit=${limit}`,
-							headers: { 'X-API-Key': credentials.apiKey as string },
-						});
+						url = `/v1/forms?limit=${limit}`;
 					} else if (operation === 'get') {
 						const formId = this.getNodeParameter('formId', i) as string;
-						response = await this.helpers.httpRequest({
-							method: 'GET',
-							url: `${baseUrl}/v1/forms/${formId}`,
-							headers: { 'X-API-Key': credentials.apiKey as string },
-						});
+						url = `/v1/forms/${formId}`;
 					}
 				} else if (resource === 'response') {
 					if (operation === 'getAll') {
 						const limit = this.getNodeParameter('limit', i) as number;
-						response = await this.helpers.httpRequest({
-							method: 'GET',
-							url: `${baseUrl}/v1/answers?limit=${limit}`,
-							headers: { 'X-API-Key': credentials.apiKey as string },
-						});
+						url = `/v1/answers?limit=${limit}`;
 					} else if (operation === 'get') {
 						const responseId = this.getNodeParameter('responseId', i) as string;
-						response = await this.helpers.httpRequest({
-							method: 'GET',
-							url: `${baseUrl}/v1/answers/${responseId}`,
-							headers: { 'X-API-Key': credentials.apiKey as string },
-						});
+						url = `/v1/answers/${responseId}`;
 					}
 				}
+
+				const response = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'recramApi',
+					{ method: 'GET', url },
+				);
 
 				const responseData = response as IDataObject;
 				if (responseData?.data) {

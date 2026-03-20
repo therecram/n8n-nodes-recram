@@ -65,16 +65,15 @@ export class RecramTrigger implements INodeType {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
 				const webhookData = this.getWorkflowStaticData('node');
 				if (webhookData.webhookId) {
-					const credentials = await this.getCredentials('recramApi');
-					const baseUrl = credentials.baseUrl as string;
 					try {
-						await this.helpers.httpRequest({
-							method: 'GET',
-							url: `${baseUrl}/v1/webhooks/${webhookData.webhookId}`,
-							headers: {
-								'X-API-Key': credentials.apiKey as string,
+						await this.helpers.httpRequestWithAuthentication.call(
+							this,
+							'recramApi',
+							{
+								method: 'GET',
+								url: `/v1/webhooks/${webhookData.webhookId}`,
 							},
-						});
+						);
 						return true;
 					} catch {
 						return false;
@@ -86,8 +85,6 @@ export class RecramTrigger implements INodeType {
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default') as string;
 				const event = this.getNodeParameter('event') as string;
-				const credentials = await this.getCredentials('recramApi');
-				const baseUrl = credentials.baseUrl as string;
 
 				const body = {
 					target_url: webhookUrl,
@@ -99,15 +96,16 @@ export class RecramTrigger implements INodeType {
 					},
 				};
 
-				const response = await this.helpers.httpRequest({
-					method: 'POST',
-					url: `${baseUrl}/v1/webhooks`,
-					headers: {
-						'X-API-Key': credentials.apiKey as string,
-						'Content-Type': 'application/json',
+				const response = await this.helpers.httpRequestWithAuthentication.call(
+					this,
+					'recramApi',
+					{
+						method: 'POST',
+						url: '/v1/webhooks',
+						body,
+						headers: { 'Content-Type': 'application/json' },
 					},
-					body,
-				});
+				);
 
 				if (response?.data?.id) {
 					const webhookData = this.getWorkflowStaticData('node');
@@ -123,17 +121,15 @@ export class RecramTrigger implements INodeType {
 				const webhookData = this.getWorkflowStaticData('node');
 				if (!webhookData.webhookId) return true;
 
-				const credentials = await this.getCredentials('recramApi');
-				const baseUrl = credentials.baseUrl as string;
-
 				try {
-					await this.helpers.httpRequest({
-						method: 'DELETE',
-						url: `${baseUrl}/v1/webhooks/${webhookData.webhookId}`,
-						headers: {
-							'X-API-Key': credentials.apiKey as string,
+					await this.helpers.httpRequestWithAuthentication.call(
+						this,
+						'recramApi',
+						{
+							method: 'DELETE',
+							url: `/v1/webhooks/${webhookData.webhookId}`,
 						},
-					});
+					);
 				} catch {
 					// Webhook may already be deleted
 				}

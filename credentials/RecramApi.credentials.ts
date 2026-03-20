@@ -33,6 +33,7 @@ export class RecramApi implements ICredentialType {
 			headers: {
 				'X-API-Key': '={{$credentials.apiKey}}',
 			},
+			url: '={{$credentials.baseUrl}}',
 		},
 	};
 
