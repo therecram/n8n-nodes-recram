@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-recram",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "n8n community node for RecRam — AI-powered video survey platform",
   "keywords": [
     "n8n-community-node-package"
