@@ -1,0 +1,27 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - EXTRA_NODE_MODULES=n8n-nodes-recram
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./dist:/opt/custom-nodes/n8n-nodes-recram/dist:ro
+      - ./package.json:/opt/custom-nodes/n8n-nodes-recram/package.json:ro
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        mkdir -p /home/node/.n8n/nodes/node_modules
+        cp -r /opt/custom-nodes/n8n-nodes-recram /home/node/.n8n/nodes/node_modules/
+        cd /home/node/.n8n/nodes
+        if [ ! -f package.json ]; then npm init -y 2>/dev/null; fi
+        n8n start
+
+volumes:
+  n8n_data:

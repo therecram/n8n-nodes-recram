@@ -64,6 +64,8 @@ export class RecramTrigger implements INodeType {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
 				const webhookData = this.getWorkflowStaticData('node');
+				const credentials = await this.getCredentials('recramApi');
+				const baseUrl = credentials.baseUrl as string;
 				if (webhookData.webhookId) {
 					try {
 						await this.helpers.httpRequestWithAuthentication.call(
@@ -71,7 +73,7 @@ export class RecramTrigger implements INodeType {
 							'recramApi',
 							{
 								method: 'GET',
-								url: `/v1/webhooks/${webhookData.webhookId}`,
+								url: `${baseUrl}/v1/webhooks/${webhookData.webhookId}`,
 							},
 						);
 						return true;
@@ -83,6 +85,8 @@ export class RecramTrigger implements INodeType {
 			},
 
 			async create(this: IHookFunctions): Promise<boolean> {
+				const credentials = await this.getCredentials('recramApi');
+				const baseUrl = credentials.baseUrl as string;
 				const webhookUrl = this.getNodeWebhookUrl('default') as string;
 				const event = this.getNodeParameter('event') as string;
 
@@ -101,7 +105,7 @@ export class RecramTrigger implements INodeType {
 					'recramApi',
 					{
 						method: 'POST',
-						url: '/v1/webhooks',
+						url: `${baseUrl}/v1/webhooks`,
 						body,
 						headers: { 'Content-Type': 'application/json' },
 					},
@@ -118,6 +122,8 @@ export class RecramTrigger implements INodeType {
 			},
 
 			async delete(this: IHookFunctions): Promise<boolean> {
+				const credentials = await this.getCredentials('recramApi');
+				const baseUrl = credentials.baseUrl as string;
 				const webhookData = this.getWorkflowStaticData('node');
 				if (!webhookData.webhookId) return true;
 
@@ -127,7 +133,7 @@ export class RecramTrigger implements INodeType {
 						'recramApi',
 						{
 							method: 'DELETE',
-							url: `/v1/webhooks/${webhookData.webhookId}`,
+							url: `${baseUrl}/v1/webhooks/${webhookData.webhookId}`,
 						},
 					);
 				} catch {

@@ -5,6 +5,7 @@ import type {
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 export class Recram implements INodeType {
 	description: INodeTypeDescription = {
@@ -120,33 +121,35 @@ export class Recram implements INodeType {
 		const returnData: INodeExecutionData[] = [];
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
+		const credentials = await this.getCredentials('recramApi');
+		const baseUrl = credentials.baseUrl as string;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
-				let url = '';
+				let path = '';
 
 				if (resource === 'form') {
 					if (operation === 'getAll') {
 						const limit = this.getNodeParameter('limit', i) as number;
-						url = `/v1/forms?limit=${limit}`;
+						path = `/v1/forms?limit=${limit}`;
 					} else if (operation === 'get') {
 						const formId = this.getNodeParameter('formId', i) as string;
-						url = `/v1/forms/${formId}`;
+						path = `/v1/forms/${formId}`;
 					}
 				} else if (resource === 'response') {
 					if (operation === 'getAll') {
 						const limit = this.getNodeParameter('limit', i) as number;
-						url = `/v1/answers?limit=${limit}`;
+						path = `/v1/answers?limit=${limit}`;
 					} else if (operation === 'get') {
 						const responseId = this.getNodeParameter('responseId', i) as string;
-						url = `/v1/answers/${responseId}`;
+						path = `/v1/answers/${responseId}`;
 					}
 				}
 
 				const response = await this.helpers.httpRequestWithAuthentication.call(
 					this,
 					'recramApi',
-					{ method: 'GET', url },
+					{ method: 'GET', url: `${baseUrl}${path}` },
 				);
 
 				const responseData = response as IDataObject;
@@ -156,20 +159,21 @@ export class Recram implements INodeType {
 						returnData.push(
 							...data.map((item: unknown) => ({
 								json: item as IDataObject,
+								pairedItem: { item: i },
 							})),
 						);
 					} else {
-						returnData.push({ json: data as IDataObject });
+						returnData.push({ json: data as IDataObject, pairedItem: { item: i } });
 					}
 				} else {
-					returnData.push({ json: responseData || {} });
+					returnData.push({ json: responseData || {}, pairedItem: { item: i } });
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ json: { error: (error as Error).message } });
+					returnData.push({ json: { error: (error as Error).message }, pairedItem: { item: i } });
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), { message: (error as Error).message } as unknown as never);
 			}
 		}
 
